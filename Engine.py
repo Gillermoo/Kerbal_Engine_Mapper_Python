@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+from Fuels import Fuels
 
 class Engine:
     """
@@ -74,5 +75,19 @@ class Engine:
             if eng['Name'] in allowedEngines:
                 engines.append(Engine(eng['Name'], eng['Mass'], eng['Thrust ASL'], eng['Thrust VAC'], eng['ISP ASL'],
                                       eng['ISP VAC'], eng['Cost'], isRadial, fuelType, builtInFuel))
+
+        for idx, eng in SRB.iterrows():
+            if eng['Name'] in allowedEngines:
+                solidFuelCost = Fuels.solidFuel['Cost']
+                emptyCost = eng['Cost'] - solidFuelCost * eng['Solid Fuel']
+
+                if eng['Size'] == 'Radial mounted':
+                    isRadial = True
+                else:
+                    isRadial = False
+
+                engines.append(Engine(eng['Name'], eng['Mass Empty'], eng['Thrust ASL'], eng['Thrust VAC'], eng['ISP ASL'],
+                                      eng['ISP VAC'], emptyCost, isRadial, fuelType, eng['Solid Fuel']))
+
 
         return engines

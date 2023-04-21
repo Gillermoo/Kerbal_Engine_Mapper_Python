@@ -1,0 +1,1 @@
+conda env export --from-history --name Kerbal_Engine_Mapper_Python > environment.yml
