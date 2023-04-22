@@ -42,6 +42,7 @@ def main():
     'Pullox'        :True}
     engines = Engine.setupEngines(allowedEngines)
     tanks = FuelTank()
+    tanks.best_cost_per_ton_structure(500, 'LF')
 
 
 if __name__ == "__main__":
