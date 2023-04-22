@@ -1,4 +1,5 @@
 from Engine import Engine
+from FuelTank import FuelTank
 import pandas as pd
 
 def main():
@@ -39,7 +40,9 @@ def main():
     'Thoroughbred'  :True,
     'Clydesdale'    :True,
     'Pullox'        :True}
-    Engine.setupEngines(allowedEngines)
+    engines = Engine.setupEngines(allowedEngines)
+    tanks = FuelTank()
+
 
 if __name__ == "__main__":
     main()

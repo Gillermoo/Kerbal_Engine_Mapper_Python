@@ -46,8 +46,8 @@ class Engine:
         Returns:
             list: A list of Engine objects created from the CSV files.
         """
-        RF_engines = pd.read_csv(os.path.join('..', 'data', 'RFEngines.csv'))
-        SRB = pd.read_csv(os.path.join('..', 'data', 'SRB.csv'))
+        RF_engines = pd.read_csv(os.path.join('data', 'RFEngines.csv'))
+        SRB = pd.read_csv(os.path.join('data', 'SRB.csv'))
 
         engines = []
 
