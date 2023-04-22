@@ -26,14 +26,29 @@ class Engine:
         """
         self.name = name
         self.mass = mass
-        self.Tasl = Tasl
-        self.Tv = Tv
-        self.ISPasl = ISPasl
-        self.ISPv = ISPv
+        self.thrust_asl = Tasl
+        self.thrust_vac = Tv
+        self.isp_asl = ISPasl
+        self.isp_vac = ISPv
         self.cost = cost
-        self.isRadial = isRadial
-        self.fuelType = fuelType
-        self.builtInFuel = builtInFuel
+        self.is_Radial = isRadial
+        self.fuel_type = fuelType
+        self.built_in_fuel = builtInFuel
+
+    def __str__(self):
+        return f"""Name: {self.name}
+                Size: {self.size}
+                Cost: {self.cost}
+                Mass: {self.mass}
+                Thrust ASL: {self.thrust_asl}
+                Thrust VAC: {self.thrust_vac}
+                TWR ASL: {self.thrust_asl/self.mass}
+                TWR VAC: {self.thrust_vac/self.mass}
+                ISP ASL: {self.isp_asl}
+                ISP VAC: {self.isp_vac}"""
+
+    def __repr__(self):
+        return self.__str__()
 
     @staticmethod
     def setupEngines(allowedEngines: dict) -> list:
