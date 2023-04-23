@@ -1,6 +1,7 @@
 import numpy as np
 
-def pareto(X: np.ndarray, directions: np.ndarray) -> np.ndarray:
+
+def pareto(X: np.ndarray, directions: list) -> np.ndarray:
     """
     Return only the points in an array that lie on the Pareto frontier of an optimization problem.
 
@@ -29,3 +30,43 @@ def pareto(X: np.ndarray, directions: np.ndarray) -> np.ndarray:
         next_point_index = np.sum(nondominated_point_mask[:next_point_index]) + 1
 
     return is_efficient
+
+
+def get_allow_engines():
+    return {
+        'Spider': True,
+        'Twitch': True,
+        'Thud': True,
+        'Ant': True,
+        'Spark': True,
+        'Terrier': True,
+        'Reliant': True,
+        'Swivel': True,
+        'Vector': True,
+        'Dart': True,
+        'Nerv': True,
+        'Poodle': True,
+        'Skipper': True,
+        'Mainsail': True,
+        'Twin-Boar': True,
+        'Rhino': True,
+        'Mammoth': True,
+        'R.A.P.I.E.R.': True,
+        'Dawn': True,
+        'Mastodon': True,
+        'Cheetah': True,
+        'Bobcat': True,
+        'Skiff': True,
+        'Wolfhound': True,
+        'Kodiak': True,
+        'Cub': True,
+        'Flea': True,
+        'Hammer': True,
+        'Thumper': True,
+        'Kickback': True,
+        'Sepratron I': True,
+        'Shrimp': True,
+        'Mite': True,
+        'Thoroughbred': True,
+        'Clydesdale': True,
+        'Pullox': True}

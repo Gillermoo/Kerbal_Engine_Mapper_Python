@@ -93,7 +93,7 @@ class Engine:
 
         for idx, eng in SRB.iterrows():
             if eng['Name'] in allowedEngines:
-                solidFuelCost = Fuels.solidFuel['Cost']
+                solidFuelCost = Fuels.SolidFuel['Cost']
                 emptyCost = eng['Cost'] - solidFuelCost * eng['Solid Fuel']
 
                 if eng['Size'] == 'Radial mounted':
