@@ -6,6 +6,9 @@ from Fuels import Fuels
 
 
 class RocketStage:
+    """
+    RocketStage KSP Rocket Stage
+    """
     tanks = FuelTank()
     engines = Engine.setupEngines(get_allow_engines())
     g = 9.8
@@ -34,13 +37,11 @@ class RocketStage:
                                                                        self.fuel)
         print(str2)
 
-    @staticmethod
-    def setup_dv_pl_arrays(dv, pl, num_engines):
-
-        return dv_array, pl_array
-
     @classmethod
     def setup_physics_arrays(cls, dv, pl, eng_type, max_eng_quant, asl_or_vac):
+        """
+        setup_physics_arrays sets up a multi-dimensional array to be used in the mathematical modeling of the engines.
+        """
         engines = [eng for eng in cls.engines if eng.fuel_type == eng_type]
         num_engines = cls.count_rep(max_eng_quant, len(engines))
 
@@ -124,6 +125,12 @@ class LinerStage(RocketStage):
 
     @classmethod
     def optimize_plot(cls, pl_span, dv_span, span, max_eng_quant, asl_or_vac, TWR_req):
+        """
+        Optimizes a rocket stage for a given sweep of points
+
+        Plots:
+            Plot of Engine indicies that are labeled for each engine type
+        """
         pl = np.logspace(np.log10(pl_span[0]), np.log10(pl_span[1]), span)
         dv = np.linspace(dv_span[0], dv_span[1], span)
 
@@ -143,6 +150,20 @@ class LinerStage(RocketStage):
                                                                                                              asl_or_vac)
 
             best_empty_fraction = cls.tanks.__getattribute__(eng_type)['percent_structure']
+            # Solve the rocket equation for the total mass of fuel tanks m100
+            # Δv = ISP * g * ln(m0 / m1)
+            # Given:
+            # m100 = mass_structure + mass_fuel
+            # ms = mass_structure = m100 * empty_fraction
+            # m0  = mass_PL + mass_engines + mass_structure + mass_fuel = mass_PL + mass_engines + m100
+            # m1 = mass_PL + mass_engines + ms = mass_PL + mass_engines + m100 * empty_fraction
+            #                 Δv
+            # exp =  e ^ _____________
+            #              (isp * g)
+            #
+            #          (PL + mass_engine) * (1 - exp)
+            # m100 = _________________________________
+            #             empty_fraction * exp - 1
 
             exp = np.exp(dv_array / (isp * cls.g))
             # Calculate M100 which is the Structure + fuel
