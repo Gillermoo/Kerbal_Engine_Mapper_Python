@@ -168,4 +168,3 @@ class LinerStage(RocketStage):
             all_mtot = np.concatenate((all_mtot, m_tot), axis=2)
             all_costs = np.concatenate((all_costs, costs), axis=2)
 
-        best_mass_idx =
