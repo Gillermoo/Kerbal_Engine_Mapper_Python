@@ -60,6 +60,13 @@ class FuelTank:
             'cost_per_ton_structure': (cost_per_ton_structure[idx]).to_numpy(),
             'total_fuel_capacity': total_fuel_capacity.iloc[idx]}
 
+        SRB = pd.read_csv(os.path.join('data', 'SRB.csv'))
+        self.SolidFuel = {
+            'percent_structure': SRB['Mass Empty'] / SRB['Mass Full'],
+            'cost_per_ton_structure': [0],
+            'total_fuel_capacity': SRB['Solid Fuel'],
+            'names': SRB['Name']}
+
     @staticmethod
     def make_dominant_tanks(cost_per_ton_structure, total_fuel_capacity):
         """
@@ -103,5 +110,7 @@ class FuelTank:
             idx = np.searchsorted(self.Xenon['total_fuel_capacity'], total_fuel_capacity)
             bounded_idx = np.min((idx, np.full_like(idx, len(self.Xenon['total_fuel_capacity'])-1)))
             return self.Xenon['cost_per_ton_structure'][bounded_idx]
+        if fuel_type == 'SolidFuel':
+            return 0
         else:
             raise NotImplementedError('The fuel type you requested does not exist')

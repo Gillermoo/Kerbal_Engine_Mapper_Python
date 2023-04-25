@@ -101,8 +101,16 @@ class Engine:
                 else:
                     isRadial = False
 
-                engines.append(Engine(eng['Name'], eng['Mass Empty'], eng['Thrust ASL'], eng['Thrust VAC'], eng['ISP ASL'],
-                                      eng['ISP VAC'], emptyCost, isRadial, fuelType, eng['Solid Fuel']))
+                engines.append(SRB_Engine(eng['Name'], eng['Mass Empty'], eng['Thrust ASL'], eng['Thrust VAC'], eng['ISP ASL'],
+                                      eng['ISP VAC'], emptyCost, isRadial, 'SolidFuel', eng['Solid Fuel'],
+                               eng['Mass Empty'] / eng['Mass Full']))
 
 
         return engines
+
+class SRB_Engine(Engine):
+
+    def __init__(self, name: str, mass: float, Tasl: float, Tv: float, ISPasl: float, ISPv: float, cost: float, \
+                 isRadial: bool, fuelType: str, builtInFuel: float, empty_ratio: float):
+        super().__init__(name, mass, Tasl, Tv, ISPasl, ISPv, cost, isRadial, fuelType, builtInFuel)
+        self.empty_ratio = empty_ratio

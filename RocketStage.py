@@ -3,6 +3,7 @@ from FuelTank import FuelTank
 from Engine import Engine
 from utils import get_allow_engines
 from Fuels import Fuels
+from matplotlib import pyplot as plt
 
 
 class RocketStage:
@@ -77,7 +78,11 @@ class RocketStage:
         eng_name = [eng.name for eng in engines]
         eng_name = np.tile(eng_name, max_eng_quant)
 
-        return dv_array, pl_array, isp, T, eng_mass, eng_cost, eng_name, num_engines
+        built_in_fuel = [eng.built_in_fuel for eng in engines]
+        built_in_fuel = np.tile(built_in_fuel, max_eng_quant) * num_engines
+        built_in_fuel = np.reshape(built_in_fuel, [1, 1, len(num_engines)])
+
+        return dv_array, pl_array, isp, T, eng_mass, eng_cost, eng_name, num_engines, built_in_fuel
 
     @classmethod
     def optimize_point(cls, pl, dv, max_eng_quant, asl_or_vac, TWR_req):
@@ -144,12 +149,14 @@ class LinerStage(RocketStage):
         all_costs = np.empty([span, span, 0])
 
         for eng_type in unique_eng_types:
-            dv_array, pl_array, isp, T, eng_mass, eng_cost, eng_name, num_engines = cls.setup_physics_arrays(dv, pl,
-                                                                                                             eng_type,
-                                                                                                             max_eng_quant,
-                                                                                                             asl_or_vac)
-
-            best_empty_fraction = cls.tanks.__getattribute__(eng_type)['percent_structure']
+            dv_array, pl_array, isp, T, eng_mass, eng_cost, eng_name, num_engines, built_in_fuel = \
+                cls.setup_physics_arrays(dv, pl, eng_type, max_eng_quant, asl_or_vac)
+            if eng_type == 'SolidFuel':
+                best_empty_fraction = [eng.empty_ratio for eng in cls.engines if eng.fuel_type == eng_type]
+                best_empty_fraction = np.tile(best_empty_fraction, max_eng_quant)
+                best_empty_fraction = np.reshape(best_empty_fraction, [1, 1, len(num_engines)])
+            else:
+                best_empty_fraction = cls.tanks.__getattribute__(eng_type)['percent_structure']
             # Solve the rocket equation for the total mass of fuel tanks m100
             # Δv = ISP * g * ln(m0 / m1)
             # Given:
@@ -186,6 +193,21 @@ class LinerStage(RocketStage):
             m_tot[TWR0 < TWR_req] = np.inf
             costs[TWR0 < TWR_req] = np.inf
 
+            if eng_type == 'SolidFuel':
+                m_tot[built_in_fuel < fuel_units] = np.inf
+                costs[built_in_fuel < fuel_units] = np.inf
+
             all_mtot = np.concatenate((all_mtot, m_tot), axis=2)
             all_costs = np.concatenate((all_costs, costs), axis=2)
 
+        min_mtot = np.min(all_mtot, axis=2)
+        min_costs = np.min(all_costs, axis=2)
+
+        min_mtot_idx = np.argmin(all_mtot, axis=2)
+        min_costs_idx = np.argmin(all_costs, axis=2)
+
+        min_mtot_idx[min_mtot == np.inf] = -1
+        min_costs_idx[min_costs_idx == np.inf] = -1
+
+        plt.imshow(min_mtot_idx, cmap='tab20c')
+        plt.show()
