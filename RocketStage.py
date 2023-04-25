@@ -1,7 +1,7 @@
 import numpy as np
 from FuelTank import FuelTank
 from Engine import Engine
-from utils import get_allow_engines
+from utils import get_allow_engines, pareto
 from Fuels import Fuels
 from matplotlib import pyplot as plt
 
@@ -14,7 +14,7 @@ class RocketStage:
     engines = Engine.setupEngines(get_allow_engines())
     g = 9.8
 
-    def __init__(self, mass, engine, num_engines, cost, stage_type, dv, fuel, lf, ox, xenon):
+    def __init__(self, mass, engine, num_engines, cost, stage_type, dv, fuel):
         self.mass = mass
         self.engine = engine
         self.num_engines = num_engines
@@ -22,9 +22,6 @@ class RocketStage:
         self.type = stage_type
         self.dv = dv
         self.fuel = fuel
-        self.LF = lf
-        self.OX = ox
-        self.xenon = xenon
 
     def toString(self, print_header=True):
         """
@@ -85,7 +82,7 @@ class RocketStage:
         return dv_array, pl_array, isp, T, eng_mass, eng_cost, eng_name, num_engines, built_in_fuel
 
     @classmethod
-    def optimize_point(cls, pl, dv, max_eng_quant, asl_or_vac, TWR_req):
+    def optimize_point(cls, pl, dv, max_eng_quant, asl_or_vac, TWR_req, min_type):
         """
         Optimizes a rocket stage for a given point
 
@@ -116,7 +113,7 @@ class PayloadStage(RocketStage):
         super().__init__(pl, [], 0, 0, 'PL', 0, 0, 0, 0, 0)
 
     @classmethod
-    def optimize_point(cls, pl, dv, max_eng_quant, asl_or_vac, TWR_req):
+    def optimize_point(cls, pl, dv, max_eng_quant, asl_or_vac, TWR_req, min_type):
         return cls(pl)
 
     @classmethod
@@ -125,11 +122,17 @@ class PayloadStage(RocketStage):
 
 
 class LinerStage(RocketStage):
-    def __init__(self, mass, engine, num_engines, cost, dv, fuel, lf, ox, xenon):
-        super().__init__(mass, engine, num_engines, cost, 'Linear', dv, fuel, lf, ox, xenon)
+    def __init__(self, mass, engine, num_engines, cost, dv, fuel):
+        super().__init__(mass, engine, num_engines, cost, 'Linear', dv, fuel)
 
     @classmethod
-    def optimize_plot(cls, pl_span, dv_span, span, max_eng_quant, asl_or_vac, TWR_req):
+    def optimize_point(cls, pl, dv, max_eng_quant, asl_or_vac, TWR_req, min_type):
+        stages = cls.optimize_plot([pl, pl], [dv,dv], 1, max_eng_quant, asl_or_vac, TWR_req,
+                                                         plot=False, min_type=min_type)
+        return stages
+
+    @classmethod
+    def optimize_plot(cls, pl_span, dv_span, span, max_eng_quant, asl_or_vac, TWR_req, plot=True, min_type='mass'):
         """
         Optimizes a rocket stage for a given sweep of points
 
@@ -144,6 +147,7 @@ class LinerStage(RocketStage):
 
         all_engines = []
         all_quant_engines = []
+        all_mfs = np.empty([span, span, 0])
 
         all_mtot = np.empty([span, span, 0])
         all_costs = np.empty([span, span, 0])
@@ -187,8 +191,9 @@ class LinerStage(RocketStage):
             m_tot = m100 + pl_array + eng_mass
             TWR0 = T / m_tot
 
-            all_engines.append(eng_name)
-            all_quant_engines.append(num_engines)
+            all_engines.extend(eng_name)
+            all_quant_engines.extend(num_engines)
+
 
             m_tot[TWR0 < TWR_req] = np.inf
             costs[TWR0 < TWR_req] = np.inf
@@ -199,15 +204,31 @@ class LinerStage(RocketStage):
 
             all_mtot = np.concatenate((all_mtot, m_tot), axis=2)
             all_costs = np.concatenate((all_costs, costs), axis=2)
+            all_mfs = np.concatenate((all_mfs, fuel_units), axis=2)
 
-        min_mtot = np.min(all_mtot, axis=2)
-        min_costs = np.min(all_costs, axis=2)
+        if plot:
+            min_mtot = np.min(all_mtot, axis=2)
+            min_costs = np.min(all_costs, axis=2)
 
-        min_mtot_idx = np.argmin(all_mtot, axis=2)
-        min_costs_idx = np.argmin(all_costs, axis=2)
+            min_mtot_idx = np.argmin(all_mtot, axis=2)
+            min_costs_idx = np.argmin(all_costs, axis=2)
 
-        min_mtot_idx[min_mtot == np.inf] = -1
-        min_costs_idx[min_costs_idx == np.inf] = -1
+            min_mtot_idx[min_mtot == np.inf] = -1
+            min_costs_idx[min_costs_idx == np.inf] = -1
 
-        plt.imshow(min_mtot_idx, cmap='tab20c')
-        plt.show()
+            plt.imshow(min_mtot_idx, cmap='tab20c')
+            plt.show()
+        elif span == 1:
+            if min_type == 'mass':
+                idx = [np.argmin(all_mtot)]
+            elif min_type == 'cost':
+                idx = pareto(np.concatenate((all_costs[0, :, :], all_mtot[0, :, :]), axis=0).T, [-1, -1])
+            else:
+                raise NotImplementedError("Optimization is only implemented for mass or cost")
+            stages = [None] * len(idx)
+            for i in range(len(idx)):
+                stages[i] = cls(all_mtot[:, :, idx[i]], all_engines[idx[i]], all_quant_engines[idx[i]],
+                                all_costs[0, 0, idx[i]], dv, all_mfs[0, 0, idx[i]])
+            return stages
+        else:
+            raise NotImplementedError("Multi-span pareto optimization is currently not supported")
