@@ -31,7 +31,7 @@ class Engine:
         self.isp_asl = ISPasl
         self.isp_vac = ISPv
         self.cost = cost
-        self.is_Radial = isRadial
+        self.is_radial = isRadial
         self.fuel_type = fuelType
         self.built_in_fuel = builtInFuel
 
