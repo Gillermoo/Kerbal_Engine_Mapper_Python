@@ -4,15 +4,12 @@ import time
 
 
 def main():
-    pl_bounds = [.01, 1000]
-    dv_bounds = [100, 4000]
-    span = 500
+    pl_bounds = [.01, 4000]
+    dv_bounds = [100, 6500]
+    span = 1000
     eng = RocketStage.engines[10]
     t0 = time.time()
-    LS.iterative_forward_optimizer(eng, 'asl', pl_bounds, dv_bounds, span, 4, max_iter=20)
-    t1 = time.time()
-    total = t1 - t0
-    print(total)
+    LS.optimize_plot(pl_bounds, dv_bounds, 500, 5, 'asl', TWR_req=1, plot=True, min_type='mass')
 
 
 if __name__ == "__main__":

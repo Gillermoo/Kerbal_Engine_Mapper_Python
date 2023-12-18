@@ -1,9 +1,10 @@
 import numpy as np
 from FuelTank import FuelTank
 from Engine import Engine
-from utils import get_allow_engines
-from torch import float32, tensor
-from copy import copy
+from utils import get_allow_engines, rand_cmap
+from sklearn.neighbors import NearestNeighbors
+from matplotlib import pyplot as plt
+from matplotlib.colors import ListedColormap
 
 
 class RocketStage:
@@ -176,4 +177,36 @@ class RocketStage:
                 break
 
         return dv_array, pl_array, m100_array
+
+    @classmethod
+    def plotDVPLDiagram(cls, min_tot_idx, all_engines, all_quant_engines, pl, dv):
+        max_eng_num = np.max(min_tot_idx)
+        cmap = rand_cmap(max_eng_num, type='bright', first_color_black=False, last_color_black=False, verbose=False)
+        plt.figure(figsize=(10, 10))
+        DVDV, PLPL = np.meshgrid(dv, pl)
+        plt.pcolormesh(DVDV, PLPL, min_tot_idx.transpose(), cmap=cmap)
+        plt.yscale("log")
+        span = min_tot_idx.shape[0]
+        def location_converter(point, dv, pl):
+            transposed = [point[0, 0, 0], point[0, 0, 1]]
+            transposed[0] = dv[transposed[0]]
+            transposed[1] = pl[transposed[1]]
+            return transposed
+
+        for unique_id in np.unique(min_tot_idx):
+            if unique_id == -1:
+                continue
+            #Find Centroid of the set of datapoints
+            points = np.argwhere(min_tot_idx == unique_id)
+            center = np.mean(points, axis=0)
+            nbrs = NearestNeighbors(n_neighbors=1, algorithm='ball_tree').fit(points)
+            nearest_idx = nbrs.kneighbors([center])
+            nearest = location_converter(points[nearest_idx[1], :], dv, pl)
+            plt.scatter(nearest[0], nearest[1], 20, color=cmap(unique_id / max_eng_num), edgecolors='k')
+            plt.text(nearest[0], nearest[1], u"\u2190 " + str(all_quant_engines[unique_id]) + " " + all_engines[unique_id],
+                     rotation=30, rotation_mode='anchor')
+        plt.grid(which='both')
+        plt.savefig('Optimal_Rocket_Plot.png')
+
+
 

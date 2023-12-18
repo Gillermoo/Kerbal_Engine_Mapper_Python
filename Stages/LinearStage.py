@@ -2,7 +2,7 @@ from Stages.RocketStage import RocketStage
 import numpy as np
 from Fuels import Fuels
 from utils import pareto
-from matplotlib import pyplot as plt
+
 
 
 class LinearStage(RocketStage):
@@ -109,8 +109,9 @@ class LinearStage(RocketStage):
             min_mtot_idx[min_mtot == np.inf] = -1
             min_costs_idx[min_costs_idx == np.inf] = -1
 
-            plt.imshow(min_mtot_idx, cmap='tab20c')
-            plt.show()
+            if min_type == 'mass':
+                cls.plotDVPLDiagram(min_mtot_idx, all_engines, all_quant_engines, pl, dv)
+
         elif span == 1:
             if min_type == 'mass':
                 idx = [np.argmin(all_mtot)]
