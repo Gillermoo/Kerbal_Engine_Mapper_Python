@@ -1,5 +1,6 @@
 import numpy as np
 from FuelTank import FuelTank
+from Fuels import Fuels
 from Engine import Engine, KSP2_Engine
 from utils import get_allow_engines, rand_cmap, get_allow_engines_KSP2
 from sklearn.neighbors import NearestNeighbors
@@ -13,6 +14,7 @@ class RocketStage:
     """
     tanks = FuelTank()
     engines = Engine.setupEngines(get_allow_engines())
+    fuels = Fuels
 
     '''
     This is what it would look like if you were creating a class that used the KSP2 Data
@@ -185,7 +187,7 @@ class RocketStage:
         return dv_array, pl_array, m100_array
 
     @classmethod
-    def plotDVPLDiagram(cls, min_tot_idx, all_engines, all_quant_engines, pl, dv, filename):
+    def plotDVPLDiagram(cls, min_tot_idx, all_engines, all_quant_engines, pl, dv, filename, condition, twr_req):
         max_eng_num = np.max(min_tot_idx)
         cmap = rand_cmap(max_eng_num, type='bright', first_color_black=False, last_color_black=False, verbose=False)
         plt.figure(figsize=(10, 10))
@@ -213,6 +215,7 @@ class RocketStage:
         plt.grid(which='both')
         plt.xlabel('Delta-V (m/s)')
         plt.ylabel('Payload (Metric Tons)')
+        plt.title(condition + ' @ TWR: ' + str(twr_req))
         plt.savefig("plots/" + filename)
 
 

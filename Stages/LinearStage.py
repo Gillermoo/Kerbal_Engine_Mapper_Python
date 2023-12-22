@@ -1,6 +1,6 @@
 from Stages.RocketStage import RocketStage
 import numpy as np
-from Fuels import Fuels
+from Fuels import FuelsKSP2
 from utils import pareto
 from Engine import KSP2_Engine
 from utils import get_allow_engines_KSP2
@@ -79,9 +79,9 @@ class LinearStage(RocketStage):
             ms = m100 * best_empty_fraction
             # Calculate Mf which is the mass of fuel
             mf = m100 - ms
-            fuel_units = mf / Fuels.get_fuel_data(eng_type, 'Density')
+            fuel_units = mf / cls.fuels.get_fuel_data(eng_type, 'Density')
             costs = ms * cls.tanks.best_cost_per_ton_structure(fuel_units, eng_type) + eng_cost + \
-                    mf * Fuels.get_fuel_data(eng_type, 'Cost')
+                    mf * cls.fuels.get_fuel_data(eng_type, 'Cost')
             # Calculate m_tot which is the Structure + fuel + PL + engine masses
             m_tot = m100 + pl_array + eng_mass
             TWR0 = T / (m_tot * 9.8)
@@ -114,9 +114,9 @@ class LinearStage(RocketStage):
             min_costs_idx[min_costs_idx == np.inf] = -1
 
             if min_type == 'mass':
-                cls.plotDVPLDiagram(min_mtot_idx, all_engines, all_quant_engines, pl, dv, filename)
+                cls.plotDVPLDiagram(min_mtot_idx, all_engines, all_quant_engines, pl, dv, filename, asl_or_vac, TWR_req)
             else:
-                cls.plotDVPLDiagram(min_costs_idx, all_engines, all_quant_engines, pl, dv, filename)
+                cls.plotDVPLDiagram(min_costs_idx, all_engines, all_quant_engines, pl, dv, filename, asl_or_vac, TWR_req)
 
         elif span == 1:
             if min_type == 'mass':
@@ -166,3 +166,4 @@ class LinearStage(RocketStage):
 class LinearStageKSP2(LinearStage):
     tanks = FuelTankKSP2()
     engines = KSP2_Engine.setupEngines(get_allow_engines_KSP2())
+    fuels = FuelsKSP2

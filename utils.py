@@ -52,24 +52,24 @@ def get_allow_engines():
         'Rhino': True,
         'Mammoth': True,
         'R.A.P.I.E.R.': True,
-        'Dawn': False,
-        'Mastodon': True,
-        'Cheetah': True,
-        'Bobcat': True,
-        'Skiff': True,
-        'Wolfhound': True,
-        'Kodiak': True,
-        'Cub': True,
+        'Dawn': True,
+        'Mastodon': False,
+        'Cheetah': False,
+        'Bobcat': False,
+        'Skiff': False,
+        'Wolfhound': False,
+        'Kodiak': False,
+        'Cub': False,
         'Flea': True,
         'Hammer': True,
         'Thumper': True,
         'Kickback': True,
         'Sepratron I': True,
-        'Shrimp': True,
-        'Mite': True,
-        'Thoroughbred': True,
+        'Shrimp': False,
+        'Mite': False,
+        'Thoroughbred': False,
         'Clydesdale': True,
-        'Pullox': True}
+        'Pullox': False}
 
 
 def get_allow_engines_KSP2():
@@ -96,7 +96,13 @@ def get_allow_engines_KSP2():
         "Cornet": True,
         "Trumpet": True,
         "Tuba": True,
-        "Labradoodle": True
+        "Labradoodle": True,
+        "Flea": True,
+        "Hammer": True,
+        "Thumper": True,
+        "Kickback": True,
+        "Sepratron I": True,
+        "Clydesdale": True
     }
 
 
