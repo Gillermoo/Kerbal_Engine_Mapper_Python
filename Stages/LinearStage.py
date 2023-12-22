@@ -2,10 +2,12 @@ from Stages.RocketStage import RocketStage
 import numpy as np
 from Fuels import Fuels
 from utils import pareto
-
-
+from Engine import KSP2_Engine
+from utils import get_allow_engines_KSP2
+from FuelTank import FuelTank_KSP2
 
 class LinearStage(RocketStage):
+
     def __init__(self, mass, engine, num_engines, cost, dv, fuel):
         super().__init__(mass, engine, num_engines, cost, 'Linear', dv, fuel)
 
@@ -26,7 +28,8 @@ class LinearStage(RocketStage):
         return best_empty_fraction
 
     @classmethod
-    def optimize_plot(cls, pl_span, dv_span, span, max_eng_quant, asl_or_vac, TWR_req, plot=True, min_type='mass'):
+    def optimize_plot(cls, pl_span, dv_span, span, max_eng_quant, asl_or_vac, TWR_req, plot=True, min_type='mass',
+                      filename='Optimal_Rocket_Plot.png'):
         """
         Optimizes a rocket stage for a given sweep of points
 
@@ -80,7 +83,7 @@ class LinearStage(RocketStage):
                     mf * Fuels.get_fuel_data(eng_type, 'Cost')
             # Calculate m_tot which is the Structure + fuel + PL + engine masses
             m_tot = m100 + pl_array + eng_mass
-            TWR0 = T / m_tot
+            TWR0 = T / (m_tot * 9.8)
 
             all_engines.extend(eng_name)
             all_quant_engines.extend(num_engines)
@@ -110,7 +113,9 @@ class LinearStage(RocketStage):
             min_costs_idx[min_costs_idx == np.inf] = -1
 
             if min_type == 'mass':
-                cls.plotDVPLDiagram(min_mtot_idx, all_engines, all_quant_engines, pl, dv)
+                cls.plotDVPLDiagram(min_mtot_idx, all_engines, all_quant_engines, pl, dv, filename)
+            else:
+                cls.plotDVPLDiagram(min_costs_idx, all_engines, all_quant_engines, pl, dv, filename)
 
         elif span == 1:
             if min_type == 'mass':
@@ -157,5 +162,8 @@ class LinearStage(RocketStage):
 
         return dv_array, pl_array, m100_array
 
+class LinearStage_KSP2(LinearStage):
 
+    tanks = FuelTank_KSP2()
+    engines = KSP2_Engine.setupEngines(get_allow_engines_KSP2())
 

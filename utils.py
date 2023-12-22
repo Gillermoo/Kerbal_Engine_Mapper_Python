@@ -52,7 +52,7 @@ def get_allow_engines():
         'Rhino': True,
         'Mammoth': True,
         'R.A.P.I.E.R.': True,
-        'Dawn': True,
+        'Dawn': False,
         'Mastodon': True,
         'Cheetah': True,
         'Bobcat': True,
@@ -71,6 +71,35 @@ def get_allow_engines():
         'Clydesdale': True,
         'Pullox': True}
 
+
+def get_allow_engines_KSP2():
+    return {
+        "Spider": True,
+        "Twitch": True,
+        "Thud": True,
+        "Ant": True,
+        "Spark": True,
+        "Terrier": True,
+        "Reliant": True,
+        "Swivel": True,
+        "Vector": True,
+        "Dart": True,
+        "Nerv": True,
+        "SWERV": True,
+        "Poodle": True,
+        "Skipper": True,
+        "Mainsail": True,
+        "Rhino": True,
+        "Mammoth II": True,
+        "R.A.P.I.E.R.": True,
+        "Dawn": True,
+        "Cornet": True,
+        "Trumpet": True,
+        "Tuba": True,
+        "Labradoodle": True
+    }
+
+
 def rand_cmap(nlabels, type='bright', first_color_black=True, last_color_black=False, verbose=True):
     """
     Creates a random colormap to be used together with matplotlib. Useful for segmentation tasks
@@ -85,9 +114,8 @@ def rand_cmap(nlabels, type='bright', first_color_black=True, last_color_black=F
     import colorsys
     import numpy as np
 
-
     if type not in ('bright', 'soft'):
-        print ('Please choose "bright" or "soft" for type')
+        print('Please choose "bright" or "soft" for type')
         return
 
     if verbose:

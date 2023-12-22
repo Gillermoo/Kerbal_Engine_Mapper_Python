@@ -1,7 +1,7 @@
 import numpy as np
 from FuelTank import FuelTank
-from Engine import Engine
-from utils import get_allow_engines, rand_cmap
+from Engine import Engine, KSP2_Engine
+from utils import get_allow_engines, rand_cmap, get_allow_engines_KSP2
 from sklearn.neighbors import NearestNeighbors
 from matplotlib import pyplot as plt
 from matplotlib.colors import ListedColormap
@@ -13,6 +13,12 @@ class RocketStage:
     """
     tanks = FuelTank()
     engines = Engine.setupEngines(get_allow_engines())
+
+    '''
+    This is what it would look like if you were creating a class that used the KSP2 Data
+    tanks_KSP2 = FuelTank_KSP2()
+    engines_KSP2 = KSP2_Engine.setupEngines(get_allow_engines_KSP2())
+    '''
     g = 9.8
 
     def __init__(self, mass, engine, num_engines, cost, stage_type, dv, fuel):
@@ -179,7 +185,7 @@ class RocketStage:
         return dv_array, pl_array, m100_array
 
     @classmethod
-    def plotDVPLDiagram(cls, min_tot_idx, all_engines, all_quant_engines, pl, dv):
+    def plotDVPLDiagram(cls, min_tot_idx, all_engines, all_quant_engines, pl, dv, filename):
         max_eng_num = np.max(min_tot_idx)
         cmap = rand_cmap(max_eng_num, type='bright', first_color_black=False, last_color_black=False, verbose=False)
         plt.figure(figsize=(10, 10))
@@ -206,7 +212,9 @@ class RocketStage:
             plt.text(nearest[0], nearest[1], u"\u2190 " + str(all_quant_engines[unique_id]) + " " + all_engines[unique_id],
                      rotation=30, rotation_mode='anchor')
         plt.grid(which='both')
-        plt.savefig('Optimal_Rocket_Plot.png')
+        plt.xlabel('Delta-V (m/s)')
+        plt.ylabel('Payload (Metric Tons)')
+        plt.savefig("plots/" + filename)
 
 
 

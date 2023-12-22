@@ -26,11 +26,14 @@ class FuelTank:
     best_cost_per_ton_structure(totalFuelCapacity, fuelType):
         Calculates the best cost per ton of structure for a given fuel type and total fuel capacity.
     """
+    RFTank_File = 'RFTanks.csv'
+    LFTank_File = 'LFTanks.csv'
+    XenonTank_File = 'XenonTanks.csv'
 
     def __init__(self):
-        rf_tanks_df = pd.read_csv(os.path.join('data', 'RFTanks.csv'), encoding="ISO-8859-1")
-        lf_tanks_df = pd.read_csv(os.path.join('data', 'LFTanks.csv'), encoding="ISO-8859-1")
-        xenon_tanks_df = pd.read_csv(os.path.join('data', 'XenonTanks.csv'), encoding="ISO-8859-1")
+        rf_tanks_df = pd.read_csv(os.path.join('data', self.RFTank_File), encoding="ISO-8859-1")
+        lf_tanks_df = pd.read_csv(os.path.join('data', self.LFTank_File), encoding="ISO-8859-1")
+        xenon_tanks_df = pd.read_csv(os.path.join('data', self.XenonTank_File), encoding="ISO-8859-1")
 
         cost_lfox_fuel = rf_tanks_df['Liquid Fuel'] * Fuels.LF['Cost'] + rf_tanks_df['Oxidizer'] * \
                          Fuels.OX['Cost']
@@ -114,3 +117,14 @@ class FuelTank:
             return 0
         else:
             raise NotImplementedError('The fuel type you requested does not exist')
+
+class FuelTank_KSP2(FuelTank):
+
+    RFTank_File = 'RFTanks_KSP2.csv'
+    LFTank_File = 'LFTanks_KSP2.csv'
+    XenonTank_File = 'XenonTanks_KSP2.csv'
+
+    def __init__(self):
+        super().__init__()
+        print(1)
+
