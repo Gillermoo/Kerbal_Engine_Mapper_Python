@@ -31,7 +31,7 @@ class Engine:
         self.isp_asl = ISPasl
         self.isp_vac = ISPv
         self.cost = cost
-        self.is_Radial = isRadial
+        self.is_radial = isRadial
         self.fuel_type = fuelType
         self.built_in_fuel = builtInFuel
 
@@ -87,12 +87,12 @@ class Engine:
                 builtInFuel = 0
 
             # Create a new Engine object and add it to the list of engines
-            if eng['Name'] in allowedEngines:
+            if eng['Name'] in allowedEngines and allowedEngines[eng['Name']]:
                 engines.append(Engine(eng['Name'], eng['Mass'], eng['Thrust ASL'], eng['Thrust VAC'], eng['ISP ASL'],
                                       eng['ISP VAC'], eng['Cost'], isRadial, fuelType, builtInFuel))
 
         for idx, eng in SRB.iterrows():
-            if eng['Name'] in allowedEngines:
+            if eng['Name'] in allowedEngines and allowedEngines[eng['Name']]:
                 solidFuelCost = Fuels.SolidFuel['Cost']
                 emptyCost = eng['Cost'] - solidFuelCost * eng['Solid Fuel']
 
@@ -105,6 +105,62 @@ class Engine:
                                       eng['ISP VAC'], emptyCost, isRadial, 'SolidFuel', eng['Solid Fuel'],
                                eng['Mass Empty'] / eng['Mass Full']))
 
+
+        return engines
+
+class KSP2_Engine(Engine):
+    def setupEngines(allowedEngines: dict) -> list:
+        """
+        Reads the rocket engine data from CSV files, creates a list of engines and returns it.
+
+        Args:
+            allowedEngines (list): The list of allowed engine names to use in the game.
+
+        Returns:
+            list: A list of Engine objects created from the CSV files.
+        """
+        RF_engines = pd.read_csv(os.path.join('data', 'RFEngines_KSP2.csv'))
+        SRB = pd.read_csv(os.path.join('data', 'SRB.csv'))
+
+        engines = []
+
+        for idx, eng in RF_engines.iterrows():
+            # Determine if the engine is radial or not
+            if eng['Size'] == 'Radial mounted':
+                isRadial = True
+            else:
+                isRadial = False
+
+            # Determine the fuel type and amount of built-in fuel for the engine
+            if eng['Name'] == 'Nerv' or eng['Name'] == 'SWERV':
+                fuelType = 'Hydrogen'
+            elif eng['Name'] == 'Dawn':
+                fuelType = 'Xenon'
+            else:
+                fuelType = 'LFOX'
+
+            builtInFuel = 0
+            engine_cost = 0
+
+            # Create a new Engine object and add it to the list of engines
+            if eng['Name'] in allowedEngines and allowedEngines[eng['Name']]:
+                engines.append(Engine(eng['Name'], eng['Mass'], eng['Thrust ASL'], eng['Thrust VAC'], eng['ISP ASL'],
+                                      eng['ISP VAC'], engine_cost, isRadial, fuelType, builtInFuel))
+
+        for idx, eng in SRB.iterrows():
+            if eng['Name'] in allowedEngines and allowedEngines[eng['Name']]:
+                solidFuelCost = Fuels.SolidFuel['Cost']
+                emptyCost = engine_cost - solidFuelCost * eng['Solid Fuel']
+
+                if eng['Size'] == 'Radial mounted':
+                    isRadial = True
+                else:
+                    isRadial = False
+
+                engines.append(
+                    SRB_Engine(eng['Name'], eng['Mass Empty'], eng['Thrust ASL'], eng['Thrust VAC'], eng['ISP ASL'],
+                               eng['ISP VAC'], engine_cost, isRadial, 'SolidFuel', eng['Solid Fuel'],
+                               eng['Mass Empty'] / eng['Mass Full']))
 
         return engines
 

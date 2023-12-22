@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-from Fuels import Fuels
+from Fuels import Fuels, FuelsKSP2
 import numpy as np
 from utils import pareto
 from matplotlib import pyplot as plt
@@ -26,14 +26,18 @@ class FuelTank:
     best_cost_per_ton_structure(totalFuelCapacity, fuelType):
         Calculates the best cost per ton of structure for a given fuel type and total fuel capacity.
     """
+    RFTank_File = 'RFTanks.csv'
+    LFTank_File = 'LFTanks.csv'
+    XenonTank_File = 'XenonTanks.csv'
+    fuel_class = Fuels
 
     def __init__(self):
-        rf_tanks_df = pd.read_csv(os.path.join('data', 'RFTanks.csv'), encoding="ISO-8859-1")
-        lf_tanks_df = pd.read_csv(os.path.join('data', 'LFTanks.csv'), encoding="ISO-8859-1")
-        xenon_tanks_df = pd.read_csv(os.path.join('data', 'XenonTanks.csv'), encoding="ISO-8859-1")
+        rf_tanks_df = pd.read_csv(os.path.join('data', self.RFTank_File), encoding="ISO-8859-1")
+        lf_tanks_df = pd.read_csv(os.path.join('data', self.LFTank_File), encoding="ISO-8859-1")
+        xenon_tanks_df = pd.read_csv(os.path.join('data', self.XenonTank_File), encoding="ISO-8859-1")
 
-        cost_lfox_fuel = rf_tanks_df['Liquid Fuel'] * Fuels.LF['Cost'] + rf_tanks_df['Oxidizer'] * \
-                         Fuels.OX['Cost']
+        cost_lfox_fuel = rf_tanks_df['Liquid Fuel'] * self.fuel_class.LF['Cost'] + rf_tanks_df['Oxidizer'] * \
+                         self.fuel_class.OX['Cost']
         cost_per_ton_structure = (rf_tanks_df['Cost Full'] - cost_lfox_fuel) / rf_tanks_df['Mass Empty']
         total_fuel_capacity = rf_tanks_df['Liquid Fuel'] + rf_tanks_df['Oxidizer']
         idx = self.make_dominant_tanks(cost_per_ton_structure, total_fuel_capacity)
@@ -42,7 +46,7 @@ class FuelTank:
             'cost_per_ton_structure': (cost_per_ton_structure[idx]).to_numpy(),
             'total_fuel_capacity': total_fuel_capacity.iloc[idx]}
 
-        cost_lf_fuel = lf_tanks_df['Liquid Fuel'] * Fuels.LF['Cost']
+        cost_lf_fuel = lf_tanks_df['Liquid Fuel'] * self.fuel_class.LF['Cost']
         cost_per_ton_structure = (lf_tanks_df['Cost Full'] - cost_lf_fuel) / lf_tanks_df['Mass Empty']
         total_fuel_capacity = lf_tanks_df['Liquid Fuel']
         idx = self.make_dominant_tanks(cost_per_ton_structure, total_fuel_capacity)
@@ -51,7 +55,7 @@ class FuelTank:
             'cost_per_ton_structure': (cost_per_ton_structure[idx]).to_numpy(),
             'total_fuel_capacity': total_fuel_capacity.iloc[idx]}
 
-        cost_xenon_fuel = xenon_tanks_df['Xenon'] * Fuels.Xenon['Cost']
+        cost_xenon_fuel = xenon_tanks_df['Xenon'] * self.fuel_class.Xenon['Cost']
         cost_per_ton_structure = (xenon_tanks_df['Cost Full'] - cost_xenon_fuel) / xenon_tanks_df['Mass Empty']
         total_fuel_capacity = xenon_tanks_df['Xenon']
         idx = self.make_dominant_tanks(cost_per_ton_structure, total_fuel_capacity)
@@ -98,19 +102,39 @@ class FuelTank:
         Raises:
         NotImplementedError: If the fuel type requested does not exist.
         """
-        if fuel_type == 'LF':
-            idx = np.searchsorted(self.LF['total_fuel_capacity'], total_fuel_capacity)
-            bounded_idx = np.min((idx, np.full_like(idx, len(self.LF['total_fuel_capacity'])-1)))
-            return self.LF['cost_per_ton_structure'][bounded_idx]
-        if fuel_type == 'LFOX':
-            idx = np.searchsorted(self.LFOX['total_fuel_capacity'], total_fuel_capacity)
-            bounded_idx = np.min((idx, np.full_like(idx, len(self.LFOX['total_fuel_capacity'])-1)))
-            return self.LFOX['cost_per_ton_structure'][bounded_idx]
-        if fuel_type == 'Xenon':
-            idx = np.searchsorted(self.Xenon['total_fuel_capacity'], total_fuel_capacity)
-            bounded_idx = np.min((idx, np.full_like(idx, len(self.Xenon['total_fuel_capacity'])-1)))
-            return self.Xenon['cost_per_ton_structure'][bounded_idx]
+        fuels_lst = ['LF', 'LFOX', 'Xenon']
+        if fuel_type in fuels_lst:
+            idx = np.searchsorted(getattr(self, fuel_type)['total_fuel_capacity'], total_fuel_capacity)
+            bounded_idx = np.min((idx, np.full_like(idx, len(getattr(self, fuel_type)['total_fuel_capacity'])-1)))
+            return getattr(self, fuel_type)['cost_per_ton_structure'][bounded_idx]
         if fuel_type == 'SolidFuel':
             return 0
         else:
             raise NotImplementedError('The fuel type you requested does not exist')
+
+class FuelTankKSP2(FuelTank):
+
+    RFTank_File = 'RFTanks_KSP2.csv'
+    LFTank_File = 'LFTanks_KSP2.csv'
+    XenonTank_File = 'XenonTanks_KSP2.csv'
+    HydrogenTank_File = 'HydrogenTanks_KSP2.csv'
+
+    fuel_class = FuelsKSP2
+
+    def __init__(self):
+        super().__init__()
+
+        hydrogen_tanks_df = pd.read_csv(os.path.join('data', self.HydrogenTank_File), encoding="ISO-8859-1")
+
+        cost_h2_fuel = hydrogen_tanks_df['Hydrogen'] * self.fuel_class.LF['Cost']
+        cost_per_ton_structure = (hydrogen_tanks_df['Cost Full'] - cost_h2_fuel) / hydrogen_tanks_df['Mass Empty']
+        total_fuel_capacity = hydrogen_tanks_df['Hydrogen']
+        idx = self.make_dominant_tanks(cost_per_ton_structure, total_fuel_capacity)
+        self.Hydrogen = {
+            'percent_structure': (hydrogen_tanks_df['Mass Empty'].iloc[idx] / hydrogen_tanks_df['Mass Full'].iloc[idx]).min(),
+            'cost_per_ton_structure': (cost_per_ton_structure[idx]).to_numpy(),
+            'total_fuel_capacity': total_fuel_capacity.iloc[idx]}
+
+    def best_cost_per_ton_structure(self, total_fuel_capacity, fuel_type):
+        return 0
+
