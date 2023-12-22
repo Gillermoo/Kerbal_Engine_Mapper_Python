@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-from Fuels import Fuels
+from Fuels import Fuels, FuelsKSP2
 import numpy as np
 from utils import pareto
 from matplotlib import pyplot as plt
@@ -29,14 +29,15 @@ class FuelTank:
     RFTank_File = 'RFTanks.csv'
     LFTank_File = 'LFTanks.csv'
     XenonTank_File = 'XenonTanks.csv'
+    fuel_class = Fuels
 
     def __init__(self):
         rf_tanks_df = pd.read_csv(os.path.join('data', self.RFTank_File), encoding="ISO-8859-1")
         lf_tanks_df = pd.read_csv(os.path.join('data', self.LFTank_File), encoding="ISO-8859-1")
         xenon_tanks_df = pd.read_csv(os.path.join('data', self.XenonTank_File), encoding="ISO-8859-1")
 
-        cost_lfox_fuel = rf_tanks_df['Liquid Fuel'] * Fuels.LF['Cost'] + rf_tanks_df['Oxidizer'] * \
-                         Fuels.OX['Cost']
+        cost_lfox_fuel = rf_tanks_df['Liquid Fuel'] * fuel_class.LF['Cost'] + rf_tanks_df['Oxidizer'] * \
+                         fuel_class.OX['Cost']
         cost_per_ton_structure = (rf_tanks_df['Cost Full'] - cost_lfox_fuel) / rf_tanks_df['Mass Empty']
         total_fuel_capacity = rf_tanks_df['Liquid Fuel'] + rf_tanks_df['Oxidizer']
         idx = self.make_dominant_tanks(cost_per_ton_structure, total_fuel_capacity)
@@ -45,7 +46,7 @@ class FuelTank:
             'cost_per_ton_structure': (cost_per_ton_structure[idx]).to_numpy(),
             'total_fuel_capacity': total_fuel_capacity.iloc[idx]}
 
-        cost_lf_fuel = lf_tanks_df['Liquid Fuel'] * Fuels.LF['Cost']
+        cost_lf_fuel = lf_tanks_df['Liquid Fuel'] * fuel_class.LF['Cost']
         cost_per_ton_structure = (lf_tanks_df['Cost Full'] - cost_lf_fuel) / lf_tanks_df['Mass Empty']
         total_fuel_capacity = lf_tanks_df['Liquid Fuel']
         idx = self.make_dominant_tanks(cost_per_ton_structure, total_fuel_capacity)
@@ -54,7 +55,7 @@ class FuelTank:
             'cost_per_ton_structure': (cost_per_ton_structure[idx]).to_numpy(),
             'total_fuel_capacity': total_fuel_capacity.iloc[idx]}
 
-        cost_xenon_fuel = xenon_tanks_df['Xenon'] * Fuels.Xenon['Cost']
+        cost_xenon_fuel = xenon_tanks_df['Xenon'] * fuel_class.Xenon['Cost']
         cost_per_ton_structure = (xenon_tanks_df['Cost Full'] - cost_xenon_fuel) / xenon_tanks_df['Mass Empty']
         total_fuel_capacity = xenon_tanks_df['Xenon']
         idx = self.make_dominant_tanks(cost_per_ton_structure, total_fuel_capacity)
@@ -118,11 +119,14 @@ class FuelTank:
         else:
             raise NotImplementedError('The fuel type you requested does not exist')
 
-class FuelTank_KSP2(FuelTank):
+class FuelTankKSP2(FuelTank):
 
     RFTank_File = 'RFTanks_KSP2.csv'
     LFTank_File = 'LFTanks_KSP2.csv'
     XenonTank_File = 'XenonTanks_KSP2.csv'
+    HydrogenTank_File = 'HydrogenTanks_KSP2.csv'
+
+    fuel_class = FuelsKSP2
 
     def __init__(self):
         super().__init__()

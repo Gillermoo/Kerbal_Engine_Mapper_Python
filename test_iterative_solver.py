@@ -1,5 +1,5 @@
 from Stages.LinearStage import LinearStage as LS
-from Stages.LinearStage import LinearStage_KSP2 as LS2
+from Stages.LinearStage import LinearStageKSP2 as LS2
 from Stages.RocketStage import RocketStage
 import time
 

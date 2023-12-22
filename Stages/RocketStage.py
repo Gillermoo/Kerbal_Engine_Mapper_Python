@@ -192,7 +192,6 @@ class RocketStage:
         DVDV, PLPL = np.meshgrid(dv, pl)
         plt.pcolormesh(DVDV, PLPL, min_tot_idx.transpose(), cmap=cmap)
         plt.yscale("log")
-        span = min_tot_idx.shape[0]
         def location_converter(point, dv, pl):
             transposed = [point[0, 0, 0], point[0, 0, 1]]
             transposed[0] = dv[transposed[0]]

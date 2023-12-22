@@ -4,7 +4,8 @@ from Fuels import Fuels
 from utils import pareto
 from Engine import KSP2_Engine
 from utils import get_allow_engines_KSP2
-from FuelTank import FuelTank_KSP2
+from FuelTank import FuelTankKSP2
+
 
 class LinearStage(RocketStage):
 
@@ -132,7 +133,6 @@ class LinearStage(RocketStage):
         else:
             raise NotImplementedError("Multi-span pareto optimization is currently not supported")
 
-
     @classmethod
     def _forward_data_generator(cls, eng, flight_cond, pl_array, m100_array, n_eng_max):
 
@@ -162,8 +162,7 @@ class LinearStage(RocketStage):
 
         return dv_array, pl_array, m100_array
 
-class LinearStage_KSP2(LinearStage):
 
-    tanks = FuelTank_KSP2()
+class LinearStageKSP2(LinearStage):
+    tanks = FuelTankKSP2()
     engines = KSP2_Engine.setupEngines(get_allow_engines_KSP2())
-
